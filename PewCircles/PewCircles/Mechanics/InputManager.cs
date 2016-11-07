@@ -9,11 +9,12 @@ namespace PewCircles
     {
         private readonly Dictionary<Keys, bool> _keyStates = new Dictionary<Keys, bool>();
 
-        public delegate void OnClickHandler(MouseEventArgs e);
+        public delegate void OnMouseHandler(MouseEventArgs e);
 
         public delegate void OnKeyReleasedHandler(Keys key);
 
-        public event OnClickHandler OnClick;
+        public event OnMouseHandler OnClick;
+        public event OnMouseHandler OnMouseDown;
         public event OnKeyReleasedHandler OnKeyReleased;
 
         private Func<Point> _getMousePointFunction;
@@ -54,6 +55,11 @@ namespace PewCircles
         public void MouseClicked(MouseEventArgs e)
         {
             OnClick?.Invoke(e);
+        }
+
+        internal void MouseDown(MouseEventArgs e)
+        {
+            OnMouseDown?.Invoke(e);
         }
     }
 }

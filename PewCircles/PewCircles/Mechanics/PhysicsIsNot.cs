@@ -1,4 +1,5 @@
-﻿using System;
+﻿using PewCircles.Extensions;
+using System;
 using System.Drawing;
 
 namespace PewCircles.Game
@@ -11,14 +12,16 @@ namespace PewCircles.Game
         public float? DirectionRads { get; set; }
         public float Speed { get; set; }
         public PointF LastCenter { get; set; }
-        //public float CurrentSpeed;
 
         internal void Move(PointF delta, TimeSpan timeDelta)
         {
             LastCenter = Center;
             Center = new PointF(Center.X + delta.X, Center.Y + delta.Y);
+        }
 
-            //CurrentSpeed = (float)(Center.DistanceTo(LastCenter)/timeDelta.TotalSeconds);
+        internal PointF GetDirectionAsPointAbsolute(float scale)
+        {
+            return Center.Add(GetDirectionAsPoint(scale));
         }
 
         internal PointF GetDirectionAsPoint(float scale)
@@ -30,23 +33,10 @@ namespace PewCircles.Game
 
             return new PointF((float)Math.Cos(DirectionRads.Value) * scale, (float)Math.Sin(DirectionRads.Value) * scale);
         }
-
-        internal void SetDirectionAbsolute(PointF heading)
+        
+        internal void SetDirectionRelative(PointF heading)
         {
-            if (heading == Point.Empty)
-            {
-                DirectionRads = null;
-                return;
-            }
-
-            float xDiff = heading.X - Center.X;
-            float yDiff = heading.Y - Center.Y;
-            DirectionRads = (float)Math.Atan2(yDiff, xDiff);
-        }
-
-        internal void SetDirectionRelative(Point heading)
-        {
-            if (heading == Point.Empty)
+            if (heading == PointF.Empty)
             {
                 DirectionRads = null;
                 return;

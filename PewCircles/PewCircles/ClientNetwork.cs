@@ -116,40 +116,31 @@ namespace HelloGame.Client
         private async Task WaitAndParseMessage()
         {
             NetworkMessage message = await _sender.GetAsync(_serverStream);
-
             _logger.LogInfo("Got a message: " + message.Type);
-
 
             switch (message.Type)
             {
                 case NetworkMessageType.Welcome:
                     {
                         int id = message.Payload.DeSerializeJson<int>();
-                        if (OnServerWelcome != null)
-                        {
-                            OnServerWelcome.Invoke(id);
-                        }
+                        // Not checking for null since if it is null, something very bad is happening.
+                        OnServerWelcome.Invoke(id);
                         break;
                     }
                 case NetworkMessageType.UpdateLazers:
                     {
                         var lazers = message.Payload.DeSerializeJson<List<LazerPewPewSettings>>();
-                        if (OnServerUpdateLazers != null)
-                        {
-                            OnServerUpdateLazers.Invoke(lazers);
-                        }
+                        // Not checking for null since if it is null, something very bad is happening.
+                        OnServerUpdateLazers.Invoke(lazers);
                         break;
                     }
                 case NetworkMessageType.UpdateMe:
                     {
-                        var circleSettings = message.Payload.DeSerializeJson<PewCircleSettings>();
-
+                        PewCircleSettings circleSettings = message.Payload.DeSerializeJson<PewCircleSettings>();
                         _logger.LogInfo("Circle settings: " + message.Payload);
 
-                        if (OnServerUpdateCircle != null)
-                        {
-                            OnServerUpdateCircle(circleSettings);
-                        }
+                        // Not checking for null since if it is null, something very bad is happening.
+                        OnServerUpdateCircle(circleSettings);
                         break;
                     }
                 default:

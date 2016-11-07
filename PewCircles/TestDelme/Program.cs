@@ -1,64 +1,73 @@
-﻿using StructureMap;
-using System;
+﻿using System;
 using System.Collections.Generic;
-using System.Linq;
+using System.IO;
+using System.Net;
+using System.Net.Sockets;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace TestDelme
 {
     class Program
     {
-        //class Barness
-        //{
-        //}
+        ASCIIEncoding asen = new ASCIIEncoding();
 
-        //class Bar
-        //{
-        //}
-
-        //class Foo
-        //{
-        //    public int Fooness { get; }
-
-        //    public Foo(int fooness, Barness barness, Bar bar)
-        //    {
-        //        Fooness = fooness;
-        //        // Doing something with barness and bar...
-        //    }
-
-        //    public Foo(int fooness, double bazness, Bar bar)
-        //    {
-        //        Fooness = fooness;
-        //        // Doing something with barness and bar...
-        //    }
-
-        //}
-
-        class Bar { }
-
-        class Foo
+        private void Start()
         {
-            public Foo(string magic, Bar bar) { }
+            TcpListener tcpListener = new TcpListener(IPAddress.Any, 12345);
+            tcpListener.Start();
+            var socket = tcpListener.AcceptSocket();
+
+            while (true)
+            {
+                socket.Send(asen.GetBytes("tralala"));
+                Thread.Sleep(1000);
+            }
+
+            //TcpClient tcpClient = tcpListener.AcceptTcpClient();
+            //NetworkStream clientStream = tcpClient.GetStream();
+            //var writer = new StreamWriter(clientStream);
+            //while (true)
+            //{
+            //    Console.WriteLine("Server is writing.");
+            //    writer.WriteLine("X?");
+            //    Thread.Sleep(1000);
+            //}
+        }
+
+        private void Client()
+        {
+            TcpClient client = new TcpClient("localhost", 12345);
+            NetworkStream _serverStream = client.GetStream();
+
+            while (true)
+            {
+                byte[] bb = new byte[100];
+                int x = _serverStream.Read(bb, 0, 100);
+                for (int i = 0; i < x; i++)
+                {
+                    Console.WriteLine(Convert.ToChar(bb[i]));
+                }
+            }
+
+            //var reader = new StreamReader(_serverStream);
+            //while (true)
+            //{
+            //    Console.WriteLine("Client reading...");
+            //    var x = reader.Read();
+            //    Console.WriteLine("Client read!");
+            //    Console.WriteLine(x);
+            //}
         }
 
         static void Main(string[] args)
         {
-            //IContainer container = new Container(_ => { _.ForSingletonOf<Bar>(); });
+            var p = new Program();
 
-            IContainer container = new Container();
+            Task.Run(() => { p.Start(); });
 
-            //container.GetInstance<Foo>
-
-            //Foo foo = container
-            //                .With("fooness").EqualTo(1)
-            //                .With("bazness").EqualTo(1d)
-            //                .GetInstance<Foo>();
-
-            //Foo foo2 = container
-            //    .With("fooness").EqualTo(1)
-            //    .With("barness").EqualTo(new Barness())
-            //    .GetInstance<Foo>();
+            p.Client();
         }
     }
 }

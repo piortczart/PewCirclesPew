@@ -40,6 +40,7 @@
             this.Click += new System.EventHandler(this.PewWindow_Click);
             this.KeyDown += new System.Windows.Forms.KeyEventHandler(this.PewWindow_KeyDown);
             this.KeyUp += new System.Windows.Forms.KeyEventHandler(this.PewWindow_KeyUp);
+            this.MouseDown += new System.Windows.Forms.MouseEventHandler(this.PewWindow_MouseDown);
             this.ResumeLayout(false);
 
         }

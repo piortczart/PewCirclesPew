@@ -55,7 +55,8 @@
     <Compile Include="Game\GameObject.cs" />
     <Compile Include="Game\LazerPewPew.cs" />
     <Compile Include="Game\PewCircle.cs" />
-    <Compile Include="Game\PhysicsIsNot.cs" />
+    <Compile Include="Mechanics\EventPerSecond.cs" />
+    <Compile Include="Mechanics\PhysicsIsNot.cs" />
     <Compile Include="Game\GameStuffFactory.cs" />
     <Compile Include="Mechanics\GraphicsBuffer.cs" />
     <Compile Include="Mechanics\InputManager.cs" />

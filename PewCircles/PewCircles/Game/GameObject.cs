@@ -18,6 +18,12 @@ namespace PewCircles.Game
 
         public abstract void Update(TimeSpan timeDelta);
 
+        protected void MoveOnUpdate(TimeSpan timeDelta)
+        {
+            PointF direction = Physics.GetDirectionAsPoint((float)timeDelta.TotalSeconds * Physics.Speed);
+            Physics.Move(direction, timeDelta);
+        }
+
         public string Serialize()
         {
             return this.SerializeJson();

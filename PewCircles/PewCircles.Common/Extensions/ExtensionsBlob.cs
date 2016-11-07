@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Concurrent;
+using System.Collections.Generic;
 using System.Drawing;
 using System.Web.Script.Serialization;
 using System.Windows.Forms;
@@ -7,6 +9,34 @@ namespace PewCircles.Extensions
 {
     public static class ExtensionsBlob
     {
+        public static IEnumerable<TQueueType> DequeueAll<TQueueType>(this ConcurrentQueue<TQueueType> queue)
+        {
+            TQueueType q;
+            while (queue.TryDequeue(out q))
+            {
+                yield return q;
+            }
+        }
+
+        public static PointF Add(this PointF a, PointF b)
+        {
+            return PointF.Add(a, new SizeF(b.X, b.Y));
+        }
+
+        public static PointF Subtract(this PointF a, PointF b)
+        {
+            return new PointF(a.X - b.X, a.Y - b.Y);
+        }
+
+        public static Point ToPoint(this PointF point)
+        {
+            return new Point((int)point.X, (int)point.Y);
+        }
+
+        public static Point ToPointF(this Point point)
+        {
+            return new Point(point.X, point.Y);
+        }
 
         public static TType DeSerializeJson<TType>(this string json)
         {

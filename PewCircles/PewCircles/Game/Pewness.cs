@@ -7,6 +7,8 @@ using HelloGame.Client;
 using System.Threading;
 using System.Linq;
 using HelloGame.Common.Logging;
+using PewCircles.Extensions;
+using System.Collections.Concurrent;
 
 namespace PewCircles
 {
@@ -25,18 +27,21 @@ namespace PewCircles
         private List<GameObject> _objects = new List<GameObject>();
         private object objectsSynchro = new object();
         private ILogger _logger;
-        Overlay _overlay;
-        int currentId;
+        private Overlay _overlay;
+        private int _currentId;
+
+        private ConcurrentQueue<PewCircleSettings> _netCircleSettings = new ConcurrentQueue<PewCircleSettings>();
+        private ConcurrentQueue<LazerPewPewSettings> _netLazerSettings = new ConcurrentQueue<LazerPewPewSettings>();
 
         public Pewness(InputManager inputManager, TimeSource timeSource, ClientNetwork clientNetwork, GameStuffFactory stuffFactory, LoggerFactory loggerFactory)
         {
             _timeSource = timeSource;
             _inputManager = inputManager;
             clientNetwork.OnServerWelcome += OnServerWelcome;
-            clientNetwork.OnServerUpdateLazers += UpdateLazers;
-            clientNetwork.OnServerUpdateCircle += UpdateCircle;
+            clientNetwork.OnServerUpdateLazers += QueueUpdateLazers;
+            clientNetwork.OnServerUpdateCircle += QueueUpdateCircle;
             clientNetwork.GetMyGameObjects = GetMyGameObjects;
-            _overlay = new Overlay(GetCircles);
+            _overlay = new Overlay(GetCircles, timeSource);
             _stuffFactory = stuffFactory;
             _logger = loggerFactory.CreateLogger(GetType());
         }
@@ -48,24 +53,41 @@ namespace PewCircles
                 return (TType)_objects.Where(o => o.Id == id).SingleOrDefault();
             }
         }
+        private void QueueUpdateCircle(PewCircleSettings circleSettings)
+        {
+            _netCircleSettings.Enqueue(circleSettings);
+        }
+
+        private void QueueUpdateLazers(List<LazerPewPewSettings> lazersSettings)
+        {
+            foreach (var lazerSetting in lazersSettings)
+            {
+                _netLazerSettings.Enqueue(lazerSetting);
+            }
+        }
 
         private void UpdateLazers(List<LazerPewPewSettings> lazersSettings)
         {
             foreach (var lazerSetting in lazersSettings)
             {
-                var existing = GetObjectById<LazerPewPew>(lazerSetting.Id);
-                if (existing != null)
+                UpdateLazer(lazerSetting);
+            }
+        }
+
+        private void UpdateLazer(LazerPewPewSettings lazerSettings)
+        {
+            var existing = GetObjectById<LazerPewPew>(lazerSettings.Id);
+            if (existing != null)
+            {
+                _logger.LogInfo("LAZER: Updating existing, id: " + lazerSettings.Id);
+                existing.Initialize(lazerSettings);
+            }
+            else
+            {
+                _logger.LogInfo("LAZER: Adding a new, id: " + lazerSettings.Id);
+                lock (objectsSynchro)
                 {
-                    _logger.LogInfo("LAZER: Updating existing, id: " + lazerSetting.Id);
-                    existing.Initialize(lazerSetting);
-                }
-                else
-                {
-                    _logger.LogInfo("LAZER: Adding a new, id: " + lazerSetting.Id);
-                    lock (objectsSynchro)
-                    {
-                        _objects.Add(_stuffFactory.CreateLazer(lazerSetting));
-                    }
+                    _objects.Add(_stuffFactory.CreateLazer(lazerSettings));
                 }
             }
         }
@@ -85,7 +107,6 @@ namespace PewCircles
                 {
                     _objects.Add(_stuffFactory.CreatePewCircle(circleSettings, false));
                 }
-
             }
         }
 
@@ -106,17 +127,16 @@ namespace PewCircles
                     PewCircle = _pewzor,
                     MehLazers = _objects.Where(o => o.CreatorId == _pewzor.Id && o is LazerPewPew).Cast<LazerPewPew>().ToList()
                 };
-
             }
         }
 
         private void OnServerWelcome(int id)
         {
-            currentId = id;
+            _currentId = id;
             _pewzor = _stuffFactory.CreatePewCircle(
                 new PewCircleSettings
                 {
-                    Id = currentId,
+                    Id = _currentId,
                     Name = "X" + id,
                     SpawnPoint = new PointF(100, 100)
                 }, true);
@@ -138,6 +158,16 @@ namespace PewCircles
 
         internal void Update(TimeSpan timeDelta)
         {
+            foreach (var item in _netCircleSettings.DequeueAll())
+            {
+                UpdateCircle(item);
+            }
+
+            foreach (var item in _netLazerSettings.DequeueAll())
+            {
+                UpdateLazer(item);
+            }
+
             foreach (GameObject gameObject in _objects.ToList())
             {
                 if (gameObject.IsDead)
@@ -151,16 +181,16 @@ namespace PewCircles
 
         internal void GoGoLazer(PewCircle pewCircle)
         {
-            Point mouse = _inputManager.GetMousePosition();
+            PointF mouse = _inputManager.GetMousePosition().ToPointF();
 
-            int newId = Interlocked.Increment(ref currentId);
+            int newId = Interlocked.Increment(ref _currentId);
             LazerPewPew lazer = _stuffFactory
                 .CreateLazer(new LazerPewPewSettings
                 {
                     Id = newId,
                     CreatorId = pewCircle.Id,
-                    Direction = mouse,
-                    SpawnPoint = pewCircle.Physics.Center
+                    Direction = mouse.Subtract(pewCircle.Physics.Center),
+                    SpawnPoint = pewCircle.Physics.GetDirectionAsPoint(15).Add(pewCircle.Physics.Center)
                 });
 
             lock (objectsSynchro)

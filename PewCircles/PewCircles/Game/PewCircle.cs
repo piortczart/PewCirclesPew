@@ -10,8 +10,8 @@ namespace PewCircles.Game
     {
         public int Id { get; set; }
         public string Name { get; set; }
-        //public bool IsControllable { get; set; }
         public PointF SpawnPoint { get; set; }
+        public float? DirectionRads { get; set; }
     }
 
     public class PewCircle : GameObject
@@ -20,6 +20,7 @@ namespace PewCircles.Game
         Pewness _pewness;
         Limiter _lazerLimiter;
         bool _isControlable;
+        TimeSpan _lazerFrequency = TimeSpan.FromSeconds(0.5);
 
         public string Name { get; set; }
 
@@ -30,15 +31,8 @@ namespace PewCircles.Game
 
             _inputManager = inputManager;
             _pewness = pewness;
-            _lazerLimiter = new Limiter(TimeSpan.FromSeconds(1), timeSource);
+            _lazerLimiter = new Limiter(_lazerFrequency, timeSource);
 
-        }
-
-        public PewCircle(int id, string name, PhysicsIsNot physics, InputManager inputManager, Pewness pewness, TimeSource timeSource)
-        {
-            Physics = physics;
-            Name = name;
-            _isControlable = false;
         }
 
         public void Initialize(PewCircleSettings settings, bool isControlable)
@@ -46,11 +40,12 @@ namespace PewCircles.Game
             Id = settings.Id;
             Name = settings.Name;
             Physics.Center = settings.SpawnPoint;
+            Physics.DirectionRads = settings.DirectionRads;
 
             _isControlable = isControlable;
             if (_isControlable)
             {
-                _inputManager.OnClick += Clicked;
+                _inputManager.OnMouseDown += MouseDown;
             }
         }
         public PewCircleSettings GetSettings()
@@ -59,11 +54,12 @@ namespace PewCircles.Game
             {
                 Id = Id,
                 Name = Name,
-                SpawnPoint = Physics.Center
+                SpawnPoint = Physics.Center,
+                DirectionRads = Physics.DirectionRads
             };
         }
 
-        private void Clicked(MouseEventArgs e)
+        private void MouseDown(MouseEventArgs e)
         {
             if (_lazerLimiter.CanHappen(true))
             {
@@ -74,6 +70,10 @@ namespace PewCircles.Game
         public override void Render(Graphics graphics)
         {
             base.Render(graphics);
+
+            PointF directionPointer1 = Physics.GetDirectionAsPointAbsolute(5);
+            PointF directionPointer2 = Physics.GetDirectionAsPointAbsolute(12);
+            graphics.DrawLine(Pens.Red, directionPointer1, directionPointer2);
 
             graphics.DrawCircle(Physics.Center, (int)Physics.Size, Color.Azure);
         }
@@ -103,12 +103,11 @@ namespace PewCircles.Game
                     deltaY = 1;
                 }
 
-                Physics.SetDirectionRelative(new Point(deltaX, deltaY));
-
-                PointF direction = Physics.GetDirectionAsPoint((float)timeDelta.TotalSeconds * Physics.Speed);
-
-                Physics.Move(direction, timeDelta);
+                Physics.SetDirectionRelative(new PointF(deltaX, deltaY));
             }
+
+            // Perform the "regular" move.
+            MoveOnUpdate(timeDelta);
         }
     }
 }

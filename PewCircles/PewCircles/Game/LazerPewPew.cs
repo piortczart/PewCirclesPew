@@ -5,7 +5,6 @@ using System.Drawing;
 
 namespace PewCircles.Game
 {
-
     public class LazerPewPewSettings
     {
         public int Id { get; set; }
@@ -18,6 +17,7 @@ namespace PewCircles.Game
     {
         TimeSource _timeSource;
         TimeSpan? _creationTime;
+        TimeSpan _lifeSpan = TimeSpan.FromSeconds(1);
 
         public LazerPewPew(TimeSource timeSource)
         {
@@ -34,7 +34,7 @@ namespace PewCircles.Game
             Physics.Size = 2;
             Physics.Center = settings.SpawnPoint;
 
-            Physics.SetDirectionAbsolute(settings.Direction);
+            Physics.SetDirectionRelative(settings.Direction);
         }
 
         public LazerPewPewSettings GetSettings()
@@ -57,29 +57,29 @@ namespace PewCircles.Game
 
             base.Render(graphics);
 
-            var pp = PointF.Add(Physics.Center, Physics.GetDirectionAsPoint(9).Invert().AsSizeF());
-            graphics.DrawLine(Pens.Red, Physics.Center, pp);
-            graphics.DrawCircle(pp, 2, Color.Red);
+            PointF directionPointer = PointF.Add(Physics.Center, Physics.GetDirectionAsPoint(9).Invert().AsSizeF());
+            graphics.DrawLine(Pens.Red, Physics.Center, directionPointer);
+
+            graphics.DrawCircle(directionPointer, 2, Color.Red);
         }
 
         public override void Update(TimeSpan timeDelta)
         {
-            if (IsDead)
-            {
-                return;
-            }
+            // Do nothing if dead.
+            if (IsDead) { return; }
 
+            // Is it time to die?
             if (_timeSource != null && _creationTime != null)
             {
-                if (_creationTime.Value.Add(TimeSpan.FromSeconds(1)) < _timeSource.ElapsedSinceStart)
+                if (_creationTime.Value.Add(_lifeSpan) < _timeSource.ElapsedSinceStart)
                 {
                     Die();
                     return;
                 }
             }
 
-            var direction = Physics.GetDirectionAsPoint((float)timeDelta.TotalSeconds * Physics.Speed);
-            Physics.Move(direction, timeDelta);
+            // Perform the "regular" move.
+            MoveOnUpdate(timeDelta);
         }
     }
 }

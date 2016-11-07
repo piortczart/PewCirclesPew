@@ -46,7 +46,8 @@ namespace PewCircles
             var time = new TimeCounter(_timeSource);
             while (_isVisible)
             {
-                _updateSutffAction(time.GetTimeSinceLastCall());
+                TimeSpan timePassed = time.GetTimeSinceLastCall();
+                _updateSutffAction(timePassed);
                 _buffer.Render(CreateGraphics());
                 Application.DoEvents();
             }
@@ -80,6 +81,11 @@ namespace PewCircles
         private void PewWindow_Click(object sender, EventArgs e)
         {
             _inputManager.MouseClicked((MouseEventArgs)e);
+        }
+
+        private void PewWindow_MouseDown(object sender, MouseEventArgs e)
+        {
+            _inputManager.MouseDown(e);
         }
     }
 }

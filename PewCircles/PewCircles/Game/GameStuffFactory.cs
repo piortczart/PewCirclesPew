@@ -9,7 +9,6 @@ namespace PewCircles.Game
     {
         readonly IContainer _container;
 
-
         public GameStuffFactory(IContainer container)
         {
             _container = container;
