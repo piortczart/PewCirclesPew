@@ -1,5 +1,7 @@
-﻿using PewCircles.Mechanics;
+﻿using HelloGame.Client;
+using PewCircles.Mechanics;
 using System;
+using System.Threading;
 using System.Windows.Forms;
 
 namespace PewCircles
@@ -11,8 +13,9 @@ namespace PewCircles
         private Action<TimeSpan> _updateSutffAction;
         private InputManager _inputManager;
         private TimeSource _timeSource;
+        private ClientNetwork _clientNetwork;
 
-        public PewWindow(GraphicsBuffer buffer, Pewness pewness, InputManager inputManager, TimeSource timeSource)
+        public PewWindow(GraphicsBuffer buffer, Pewness pewness, InputManager inputManager, TimeSource timeSource, ClientNetwork clientNetwork)
         {
             InitializeComponent();
             Show();
@@ -32,10 +35,14 @@ namespace PewCircles
             _timeSource = timeSource;
 
             SetStyle(ControlStyles.StandardDoubleClick, false);
+
+            _clientNetwork = clientNetwork;
         }
 
         public void PewMadness()
         {
+            _clientNetwork.StartConnection("localhost", 9999, "Client", new CancellationTokenSource());
+
             var time = new TimeCounter(_timeSource);
             while (_isVisible)
             {

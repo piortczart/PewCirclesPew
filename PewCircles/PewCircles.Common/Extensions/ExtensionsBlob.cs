@@ -1,14 +1,33 @@
 ﻿using System;
 using System.Drawing;
+using System.Web.Script.Serialization;
 using System.Windows.Forms;
 
 namespace PewCircles.Extensions
 {
     public static class ExtensionsBlob
     {
+
+        public static TType DeSerializeJson<TType>(this string json)
+        {
+            return new JavaScriptSerializer().Deserialize<TType>(json);
+        }
+
+        public static string SerializeJson(this object thing)
+        {
+            return new JavaScriptSerializer().Serialize(thing);
+        }
+
+        public static string SubstringSafe(this string text, int start, int length)
+        {
+            return text.Length <= start ? ""
+                : text.Length - start <= length ? text.Substring(start)
+                : text.Substring(start, length);
+        }
+
         public static float DistanceTo(this PointF a, PointF b)
         {
-            return (float) Math.Sqrt(Math.Pow((b.X - a.X), 2) + Math.Pow((b.Y - a.Y), 2));
+            return (float)Math.Sqrt(Math.Pow((b.X - a.X), 2) + Math.Pow((b.Y - a.Y), 2));
         }
 
         public static PointF Invert(this PointF point)

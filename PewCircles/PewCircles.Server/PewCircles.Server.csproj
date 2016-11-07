@@ -4,11 +4,11 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{8A355984-7CC1-4ACB-B39F-0F3220839ABE}</ProjectGuid>
-    <OutputType>WinExe</OutputType>
+    <ProjectGuid>{FC572B44-9820-4970-9CAD-2FE9455F366D}</ProjectGuid>
+    <OutputType>Exe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>PewCircles</RootNamespace>
-    <AssemblyName>PewCircles</AssemblyName>
+    <RootNamespace>PewCircles.Server</RootNamespace>
+    <AssemblyName>PewCircles.Server</AssemblyName>
     <TargetFrameworkVersion>v4.6</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
@@ -44,60 +44,17 @@
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="System.Data" />
-    <Reference Include="System.Deployment" />
-    <Reference Include="System.Drawing" />
     <Reference Include="System.Net.Http" />
-    <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="ClientNetwork.cs" />
-    <Compile Include="Game\GameObject.cs" />
-    <Compile Include="Game\LazerPewPew.cs" />
-    <Compile Include="Game\PewCircle.cs" />
-    <Compile Include="Game\PhysicsIsNot.cs" />
-    <Compile Include="Game\GameStuffFactory.cs" />
-    <Compile Include="Mechanics\GraphicsBuffer.cs" />
-    <Compile Include="Mechanics\InputManager.cs" />
-    <Compile Include="Game\Pewness.cs" />
-    <Compile Include="Mechanics\Limiter.cs" />
-    <Compile Include="Mechanics\Overlay.cs" />
-    <Compile Include="Mechanics\PewWindow.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="Mechanics\PewWindow.Designer.cs">
-      <DependentUpon>PewWindow.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Mechanics\TimeCounter.cs" />
-    <Compile Include="Mechanics\TimeSource.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <EmbeddedResource Include="Mechanics\PewWindow.resx">
-      <DependentUpon>PewWindow.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Properties\Resources.resx">
-      <Generator>ResXFileCodeGenerator</Generator>
-      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
-      <SubType>Designer</SubType>
-    </EmbeddedResource>
-    <Compile Include="Properties\Resources.Designer.cs">
-      <AutoGen>True</AutoGen>
-      <DependentUpon>Resources.resx</DependentUpon>
-      <DesignTime>True</DesignTime>
-    </Compile>
-    <None Include="packages.config" />
-    <None Include="Properties\Settings.settings">
-      <Generator>SettingsSingleFileGenerator</Generator>
-      <LastGenOutput>Settings.Designer.cs</LastGenOutput>
-    </None>
-    <Compile Include="Properties\Settings.Designer.cs">
-      <AutoGen>True</AutoGen>
-      <DependentUpon>Settings.settings</DependentUpon>
-      <DesignTimeSharedInput>True</DesignTimeSharedInput>
-    </Compile>
+    <Compile Include="Server.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
+    <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\PewCircles.Common\PewCircles.Common.csproj">
